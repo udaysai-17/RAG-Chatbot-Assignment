@@ -300,36 +300,10 @@ What key challenges or limitations of Agentic AI are mentioned in the document?
 ```
 
 ```text
-What is the capital of France?
+What is the capital of India?
 ```
 
 The final question is an out-of-scope test and should not be answered using external knowledge.
-
-## Assignment Requirements Coverage
-
-| Requirement | Implementation |
-|---|---|
-| PDF ingestion | PyPDF |
-| Text chunking | RecursiveCharacterTextSplitter |
-| Vector embeddings | Cohere `embed-v4.0` |
-| Vector database | Pinecone |
-| Retrieval | Pinecone similarity search |
-| Orchestration | LangGraph |
-| Response generation | Cohere `command-a-03-2025` |
-| Grounded responses | Context-only generation |
-| Confidence score | Retrieval similarity-based score |
-| Structured response | JSON payload |
-| User interface | Streamlit |
-| Documentation | README.md |
-
-## Security
-
-API keys are stored in environment variables using `.env`.
-
-The `.env` file is excluded from version control through `.gitignore`.
-
-Never commit API keys or other credentials to the public repository.
-
 
 ## Sample Results
 
@@ -359,5 +333,37 @@ The chatbot does not use external knowledge when the requested information is no
 
 It returns:
 
-```text
 I couldn't find that information in the provided document.
+
+The confidence score is 0.00.
+
+![Out-of-Scope Query](screenshots/out-of-scope-query.png)
+
+
+
+## Assignment Requirements Coverage
+
+| Requirement | Implementation |
+|---|---|
+| PDF ingestion | PyPDF |
+| Text chunking | RecursiveCharacterTextSplitter |
+| Vector embeddings | Cohere `embed-v4.0` |
+| Vector database | Pinecone |
+| Retrieval | Pinecone similarity search |
+| Orchestration | LangGraph |
+| Response generation | Cohere `command-a-03-2025` |
+| Grounded responses | Context-only generation |
+| Confidence score | Retrieval similarity-based score |
+| Structured response | JSON payload |
+| User interface | Streamlit |
+| Documentation | README.md |
+
+## Security
+
+API keys are stored in environment variables using `.env`.
+
+The `.env` file is excluded from version control through `.gitignore`.
+
+Never commit API keys or other credentials to the public repository.
+
+

@@ -329,3 +329,35 @@ API keys are stored in environment variables using `.env`.
 The `.env` file is excluded from version control through `.gitignore`.
 
 Never commit API keys or other credentials to the public repository.
+
+
+## Sample Results
+
+The RAG chatbot was tested with both in-scope and out-of-scope questions.
+
+### 1. Agentic AI Query
+
+**Query:** What is Agentic AI?
+
+The system retrieves relevant document chunks from the Agentic AI eBook and generates a context-grounded answer.
+
+![Agentic AI Query](screenshots/agentic-ai-query.png)
+
+### 2. Architecture Query
+
+**Query:** What are the main architectural components required to build Agentic AI systems?
+
+The system retrieves relevant sections from the document and generates an answer based on the retrieved context.
+
+![Architecture Query](screenshots/architecture-query.png)
+
+### 3. Out-of-Scope Query
+
+**Query:** What is the capital of India?
+
+The chatbot does not use external knowledge when the requested information is not found in the provided document.
+
+It returns:
+
+```text
+I couldn't find that information in the provided document.

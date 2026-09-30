@@ -11,24 +11,23 @@ from src.config import COHERE_API_KEY, PINECONE_INDEX_NAME
 class RAGState(TypedDict):
     question: str
     context: str
+    retrieved_context_chunks: list[str]
     answer: str
+    confidence_score: float
 
 
-# Embedding model
 embeddings = CohereEmbeddings(
     model="embed-v4.0",
     cohere_api_key=COHERE_API_KEY
 )
 
 
-# Pinecone vector store
 vectorstore = PineconeVectorStore(
     index_name=PINECONE_INDEX_NAME,
     embedding=embeddings
 )
 
 
-# Cohere chat model
 llm = ChatCohere(
     cohere_api_key=COHERE_API_KEY,
     model="command-a-03-2025",
@@ -39,23 +38,48 @@ llm = ChatCohere(
 def retrieve(state: RAGState):
     question = state["question"]
 
-    docs = vectorstore.similarity_search(
+    results = vectorstore.similarity_search_with_score(
         question,
         k=4
     )
 
-    context = "\n\n".join(
-        doc.page_content for doc in docs
-    )
+    chunks = [
+        doc.page_content
+        for doc, score in results
+    ]
+
+    context = "\n\n".join(chunks)
+
+    if results:
+        scores = [
+            float(score)
+            for doc, score in results
+        ]
+
+        confidence_score = sum(scores) / len(scores)
+
+        confidence_score = max(
+            0.0,
+            min(1.0, confidence_score)
+        )
+    else:
+        confidence_score = 0.0
 
     return {
-        "context": context
+        "context": context,
+        "retrieved_context_chunks": chunks,
+        "confidence_score": confidence_score
     }
 
 
 def generate_answer(state: RAGState):
     question = state["question"]
     context = state["context"]
+
+    confidence_score = state.get(
+        "confidence_score",
+        0.0
+    )
 
     prompt = ChatPromptTemplate.from_messages([
         (
@@ -65,9 +89,11 @@ def generate_answer(state: RAGState):
 Answer the user's question using ONLY the provided context
 from the Agentic AI eBook.
 
-If the answer cannot be found in the context, say:
+If the answer cannot be found in the context, say exactly:
+
 "I couldn't find that information in the provided document."
 
+Do not use outside knowledge.
 Do not invent information.
 Keep the answer clear and concise.
 
@@ -88,12 +114,17 @@ Context:
         "question": question
     })
 
+    answer = response.content
+
+    if "I couldn't find that information" in answer:
+        confidence_score = 0.0
+
     return {
-        "answer": response.content
+        "answer": answer,
+        "confidence_score": confidence_score
     }
 
 
-# Create LangGraph workflow
 workflow = StateGraph(RAGState)
 
 workflow.add_node("retrieve", retrieve)
